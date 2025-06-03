@@ -1,0 +1,170 @@
+{% extends "navbar.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <h2 class="text-center mb-5 display-5">Explore Our Courses</h2>
+  <div class="row">
+
+    <!-- Web Development -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100 d-flex flex-column border-0">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Web Development</h5>
+        </div>
+        {% comment %} <div class="card-body flex-grow-1">
+          <p>Build websites & apps from scratch.</p>
+        </div> {% endcomment %}
+        <div class="card-body flex-grow-1">
+          <p class="mb-2">Learn how to build dynamic websites and web apps:</p>
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item">HTML, CSS, JavaScript</li>
+            <li class="list-group-item">React, Angular, Vue</li>
+            <li class="list-group-item">Django, Flask, Node.js</li>
+          </ul>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+          <button class="btn btn-outline-primary w-100 enroll-btn" data-course="Web Development" data-price="4999">Enroll</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Science -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100 d-flex flex-column border-0">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">Data Science</h5>
+        </div>
+         <div class="card-body flex-grow-1">
+          <p class="mb-2">Master data analysis, visualization, and modeling:</p>
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item">Python, R</li>
+            <li class="list-group-item">Pandas, NumPy, Matplotlib</li>
+            <li class="list-group-item">SQL, Power BI</li>
+          </ul>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+          <button class="btn btn-outline-success w-100 enroll-btn" data-course="Data Science" data-price="4999">Enroll</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Machine Learning -->
+    <div class="col-md-4 mb-4">
+      <div class="card shadow-sm h-100 d-flex flex-column border-0">
+        <div class="card-header bg-warning text-dark">
+          <h5 class="mb-0">Machine Learning</h5>
+        </div>
+        <div class="card-body flex-grow-1">
+          <p class="mb-2">Build intelligent systems using modern ML tools:</p>
+          <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item">Python, TensorFlow, PyTorch</li>
+            <li class="list-group-item">scikit-learn, Keras</li>
+            <li class="list-group-item">NLP, Deep Learning</li>
+          </ul>
+        </div>
+        <div class="card-footer bg-transparent border-0">
+          <button class="btn btn-outline-warning w-100 enroll-btn text-dark" data-course="Machine Learning" data-price="4999">Enroll</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="paymentForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="paymentModalLabel">Course Enrollment Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>You are enrolling in: <strong id="courseName"></strong></p>
+        <p>Price: <strong>₹<span id="coursePrice"></span></strong></p>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email (optional)</label>
+          <input type="email" id="email" class="form-control" placeholder="you@example.com">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary w-100">Pay Now</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Razorpay Checkout JS -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+  const courseNameElem = document.getElementById('courseName');
+  const coursePriceElem = document.getElementById('coursePrice');
+  const paymentForm = document.getElementById('paymentForm');
+  let selectedCourse = "";
+  let selectedPrice = 0;
+
+  document.querySelectorAll('.enroll-btn').forEach(button => {
+    button.addEventListener('click', () => {
+      selectedCourse = button.getAttribute('data-course');
+      selectedPrice = button.getAttribute('data-price');
+      courseNameElem.textContent = selectedCourse;
+      coursePriceElem.textContent = selectedPrice;
+      paymentModal.show();
+    });
+  });
+
+  paymentForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+
+    // Create order on backend
+    const response = await fetch("{% url 'create_order' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: JSON.stringify({
+        course: selectedCourse,
+        amount: selectedPrice
+      }),
+    });
+
+    if (!response.ok) {
+      alert("Failed to create order. Please try again.");
+      return;
+    }
+
+    const data = await response.json();
+
+    var options = {
+      "key": data.key, // Razorpay Key ID from backend
+      "amount": data.amount, // amount in paise: ₹4999 => 499900 paise
+      "currency": data.currency,
+      "name": "Your Company Name",
+      "description": `Payment for ${data.course}`,
+      "order_id": data.order_id,
+      "handler": function (response) {
+        alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
+        paymentModal.hide();
+        paymentForm.reset();
+        // TODO: Send payment info to your backend for verification/enrollment
+      },
+      "prefill": {
+        "email": email
+      },
+      "theme": {
+        "color": "#3399cc"
+      }
+    };
+
+    var rzp1 = new Razorpay(options);
+    rzp1.open();
+  });
+});
+</script>
+{% endblock %}

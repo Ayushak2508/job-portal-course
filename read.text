@@ -1,0 +1,86 @@
+# Django Job Portal Project
+
+## Project Description
+This is a Django-based job portal web application that allows users to register, login, post jobs, and view job listings. It also includes a course page with payment integration using Razorpay.
+
+## Features
+- User registration with photo upload and password hashing
+- User login and logout functionality
+- Job posting with details like title, description, company, location, and contact info
+- Display of latest job listings on the welcome page
+- Course page with Razorpay payment integration
+- Admin interface for managing data (via Django admin)
+
+## Installation and Setup
+
+1. Clone the repository to your local machine.
+
+2. Create and activate a virtual environment (recommended):
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+3. Install the required dependencies:
+   ```bash
+   pip install -r requirement.text
+   ```
+
+4. Apply migrations to set up the database:
+   ```bash
+   python manage.py migrate
+   ```
+
+5. Create a superuser to access the admin panel (optional):
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+6. Run the development server:
+   ```bash
+   python manage.py runserver
+   ```
+
+7. Open your browser and navigate to `http://127.0.0.1:8000/` to access the application.
+
+## Usage
+
+- Register a new user via the registration page.
+- Login with your credentials.
+- View job listings on the welcome page.
+- Post new jobs using the post job form.
+- Access the course page and make payments via Razorpay integration.
+
+## Project Structure
+
+- `project/`: Django project configuration and settings.
+- `job/`: Main Django app containing models, views, URLs, and migrations.
+- `template/`: HTML templates for rendering pages.
+- `static/`: Static files like images.
+- `media/`: Uploaded media files such as user profile photos.
+- `manage.py`: Django management script.
+- `requirement.text`: Project dependencies.
+
+## Dependencies
+
+Key dependencies include:
+- Django 5.2
+- Django REST framework
+- django-cors-headers
+- django-jazzmin
+- djangorestframework_simplejwt
+- Pillow (for image handling)
+- Razorpay Python SDK
+- ReportLab (likely for PDF generation)
+- Requests
+
+## Notes
+
+- The project uses SQLite as the database.
+- Razorpay keys are configured in `project/settings.py` for payment processing.
+- Debug mode is enabled; remember to disable it in production.
+- Media files are served from the `/media/` URL during development.
+
+## License
+
+This project is provided as-is without any warranty.
